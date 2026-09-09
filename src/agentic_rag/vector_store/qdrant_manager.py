@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 from functools import lru_cache
+
 from qdrant_client import QdrantClient, models
 
 from agentic_rag.config import get_settings

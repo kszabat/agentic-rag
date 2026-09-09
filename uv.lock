@@ -51,6 +51,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pypdfium2" },
     { name = "qdrant-client" },
+    { name = "typer" },
 ]
 
 [package.dev-dependencies]
@@ -73,6 +74,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "pypdfium2", specifier = ">=5.13.0" },
     { name = "qdrant-client", specifier = ">=1.19.0" },
+    { name = "typer", specifier = ">=0.26.8" },
 ]
 
 [package.metadata.requires-dev]

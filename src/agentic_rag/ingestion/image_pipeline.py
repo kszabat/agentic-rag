@@ -10,7 +10,6 @@ from agentic_rag.config import get_settings
 from agentic_rag.embeddings.colpali_embedding import colpali_embed_documents
 from agentic_rag.vector_store.qdrant_manager import (
     IMAGE_VECTOR_NAME,
-    RagType,
     ensure_image_collection,
     get_qdrant_client,
 )

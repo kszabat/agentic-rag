@@ -39,7 +39,6 @@ name = "agentic-rag"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "colpali-engine" },
     { name = "docling" },
     { name = "flagembedding" },
     { name = "llama-index" },
@@ -52,6 +51,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pypdfium2" },
     { name = "qdrant-client" },
+    { name = "sentence-transformers", extra = ["image"] },
     { name = "typer" },
 ]
 
@@ -63,7 +63,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "colpali-engine", specifier = ">=0.3.18" },
     { name = "docling", specifier = ">=2.126.0" },
     { name = "flagembedding", specifier = ">=1.4.2" },
     { name = "llama-index", specifier = ">=0.14.24" },
@@ -76,6 +75,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "pypdfium2", specifier = ">=5.13.0" },
     { name = "qdrant-client", specifier = ">=1.19.0" },
+    { name = "sentence-transformers", extras = ["image"], specifier = ">=6.0.0" },
     { name = "typer", specifier = ">=0.26.8" },
 ]
 
@@ -618,25 +618,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8c/55/ba79756cb90c8d69d599d57785398ac87bba7b19c80e87f4e8a562197c93/colorlog-6.12.0.tar.gz", hash = "sha256:2a7924c1dadf18b22a0eb8b06d1c7b01d5341707ec1641eb6fcc4fde0c3e8e5f", size = 18151, upload-time = "2026-07-23T13:40:40.71Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d4/19/0b6647bf5e331521e55d2b63bfbdc210bd9cd605189273f03614a05f702d/colorlog-6.12.0-py3-none-any.whl", hash = "sha256:30d392604e9110045a2c2aeefc27d7a017abbab63f3a8aee594eac0801df784e", size = 12239, upload-time = "2026-07-23T13:40:39.562Z" },
-]
-
-[[package]]
-name = "colpali-engine"
-version = "0.3.18"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "peft" },
-    { name = "pillow" },
-    { name = "requests" },
-    { name = "scipy" },
-    { name = "torch" },
-    { name = "torchvision" },
-    { name = "transformers" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/0e/3b9692f60170cc345ee5aec108f83c16e762e3f074be5683498af98e042a/colpali_engine-0.3.18.tar.gz", hash = "sha256:0d7dc57ccb348d4cfe6a63b104857da145fd9783344644399dab798f98347808", size = 204202, upload-time = "2026-08-22T14:10:17.532Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2e/54/2e97a9d5332dda5bb706be070c2191b0584ac8649b78679ea662d0da5386/colpali_engine-0.3.18-py3-none-any.whl", hash = "sha256:9f04fa89d123b174a9c9e5fa31824776644e9331c37c1d79768e16e3fe5be9d4", size = 112353, upload-time = "2026-08-22T14:10:15.961Z" },
 ]
 
 [[package]]
@@ -3913,6 +3894,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/31/ab/dc6031faf1b6bba08076fbf457b21a5c51ba7928a77916915e093c16b8c7/sentence_transformers-6.0.1-py3-none-any.whl", hash = "sha256:b8888d72c707ba33c63aa30845850702dd5acadf1dd0d051436380bcebe4fd0f", size = 739832, upload-time = "2026-08-31T07:50:41.635Z" },
 ]
 
+[package.optional-dependencies]
+image = [
+    { name = "transformers", extra = ["vision"] },
+]
+
 [[package]]
 name = "sentencepiece"
 version = "0.2.2"
@@ -4318,6 +4304,12 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ad/2e/ba418680ab901dae269360bb8642485eae04f1af91ee2ebb8bd6f3607305/transformers-5.16.1.tar.gz", hash = "sha256:17b0eac726ddc55e84ac58946063e0c6d37fd000c456b581f050ea0f4e822869", size = 9650542, upload-time = "2026-08-26T14:48:58.789Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/4d/ee3728674c0bbc637bb4af88ccf0be697f92e4e90b55f5dc110c44d61b61/transformers-5.16.1-py3-none-any.whl", hash = "sha256:2f2d5b98a5ad3718713653734298fa620754ed683702a635ebb587df3ed29c7e", size = 12080592, upload-time = "2026-08-26T14:48:55.083Z" },
+]
+
+[package.optional-dependencies]
+vision = [
+    { name = "pillow" },
+    { name = "torchvision" },
 ]
 
 [[package]]

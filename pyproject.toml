@@ -21,6 +21,7 @@ dependencies = [
     "pypdfium2>=5.13.0",
     "qdrant-client>=1.19.0",
     "sentence-transformers[image]>=6.0.0",
+    "transformers>=5.16.1",
     "typer>=0.26.8",
 ]
 

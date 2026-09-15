@@ -59,7 +59,6 @@ def ensure_collection(kb_name: str, rag_type: RagType) -> str:
         return ensure_image_collection(kb_name=kb_name)
     return collection_name(kb_name=kb_name, rag_type=RagType.TEXT)
 
-
 def delete_kb(kb_name: str) -> None:
     client = get_qdrant_client()
 

@@ -36,18 +36,19 @@ def get_text_vector_store(kb_name: str) -> QdrantVectorStore:
     )
 
 
-def ingest_text_document(kb_name: str, file_path: str | Path):
+def ingest_text_document(kb_name: str, file_path: str | Path) -> int:
     documents = _reader.load_data(file_path=str(file_path))
+    nodes = _node_parser.get_nodes_from_documents(documents)
+
     storage_context = StorageContext.from_defaults(
         vector_store=get_text_vector_store(kb_name=kb_name)
     )
 
-    index = VectorStoreIndex.from_documents(
-        documents=documents,
-        transformations=[_node_parser],
+    VectorStoreIndex(
+        nodes=nodes,
         storage_context=storage_context,
         embed_model=BGEM3Embedding(),
         show_progress=True,
     )
 
-    return len(index.docstore.docs)
+    return len(nodes)

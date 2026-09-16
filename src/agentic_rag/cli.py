@@ -83,7 +83,7 @@ def ingest(
 
     for file in files:
         try:
-            count = ingest_fn(file, kb)
+            count = ingest_fn(kb_name=kb, file_path=file)
             console.print(
                 f"[green]Ingested[/green] {count} {unit} from {file.name} into knowledge base '{kb}'"
             )
@@ -124,6 +124,7 @@ def chat(
             answer = asyncio.run(run_text_rag(question, kb))
         console.print(f"[green]Answer:[/green] {answer}")
 
+
 @kb_app.command("list")
 def kb_list() -> None:
     kbs = list_kbs()
@@ -134,18 +135,21 @@ def kb_list() -> None:
     for kb in kbs:
         console.print(f"- {kb}")
 
+
 @kb_app.command("delete")
 def kb_delete(
     kb: str = typer.Argument(..., help="Name of the knowledge base to delete"),
     yes: bool = typer.Option(
         False, "--yes", "-y", help="Confirm deletion without prompting"
-    )) -> None:
+    ),
+) -> None:
     if not yes and not typer.confirm(
         f"Are you sure you want to delete the knowledge base '{kb}'?"
     ):
         raise typer.Abort()
     delete_kb(kb)
     console.print(f"[green]Knowledge base '{kb}' deleted successfully.[/green]")
+
 
 def main() -> None:
     app()

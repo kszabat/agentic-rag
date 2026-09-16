@@ -89,6 +89,7 @@ def ingest(
             )
         except Exception as e:  # noqa: BLE001
             console.print(f"[red]Error ingesting {file.name}: {e}[/red]")
+            # console.print_exception(show_locals=False)
             raise typer.Exit(code=1)
 
 

@@ -56,7 +56,7 @@ def _require_text_kb(kb: str) -> None:
 
 @app.command()
 def ingest(
-    path: Path = typer.Argument(
+    path: Path = typer.Argument(  # noqa: B008
         ...,
         help="Path to the document or directory to ingest",
         exists=True,
@@ -67,7 +67,7 @@ def ingest(
     kb: str = typer.Option(
         ..., "--kb", help="Name of the knowledge base to ingest into"
     ),
-    mode: RagType = typer.Option(
+    mode: RagType = typer.Option(  # noqa: B008
         RagType.TEXT, "--mode", help="Ingestion mode: text or image"
     ),
 ) -> None:

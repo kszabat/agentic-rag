@@ -16,7 +16,7 @@ def get_text_retriever(
 ) -> BaseRetriever:
     index = VectorStoreIndex.from_vector_store(
         vector_store=get_text_vector_store(kb_name),
-        embed_model=BGEM3Embedding,
+        embed_model=BGEM3Embedding(),
     )
 
     return index.as_retriever(

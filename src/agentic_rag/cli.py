@@ -4,6 +4,7 @@ import asyncio
 from pathlib import Path
 
 import typer
+from google.genai.errors import ServerError
 from rich.console import Console
 
 from agentic_rag.agent.workflow import run_text_rag
@@ -103,7 +104,11 @@ def query(
     _require_text_kb(kb)
 
     with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
-        answer = asyncio.run(run_text_rag(kb, question))
+        try:
+            answer = asyncio.run(run_text_rag(kb, question))
+        except ServerError:
+            console.print("[red]LLM Server is currently unavailable. Try again later.[/red]")
+            raise typer.Exit(code=1)
     console.print(f"[green]Answer:[/green] {answer}")
 
 
@@ -122,7 +127,11 @@ def chat(
         if question.strip().lower() in {"exit", "quit"}:
             break
         with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
-            answer = asyncio.run(run_text_rag(kb, question))
+            try:
+                answer = asyncio.run(run_text_rag(kb, question))
+            except ServerError:
+                console.print("[red]LLM Server is currently unavailable. Try again later.[/red]")
+                continue
         console.print(f"[green]Answer:[/green] {answer}")
 
 

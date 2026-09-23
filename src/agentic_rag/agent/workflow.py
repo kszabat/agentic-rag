@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from llama_index.core.llms import ChatMessage, ImageBlock, TextBlock
 from llama_index.core.prompts import RichPromptTemplate
 from llama_index.core.schema import NodeWithScore, QueryBundle
@@ -13,9 +15,10 @@ from llama_index.core.workflow import (
 )
 from pydantic import BaseModel, Field
 
-from typing import Literal
-
-from agentic_rag.llm.factory import get_llm
+from agentic_rag.llm.factory import (
+    achat_with_retry,
+    astructured_predict_with_retry,
+)
 from agentic_rag.retrieval.reranker import get_reranker
 from agentic_rag.retrieval.text_retriever import get_text_retriever
 from agentic_rag.vector_store.qdrant_manager import RagType
@@ -132,7 +135,7 @@ class RagWorkflow(Workflow):
         await ctx.store.set("mode", mode)
         await ctx.store.set("kb_name", kb_name)
 
-        plan = await get_llm().astructured_predict(
+        plan = await astructured_predict_with_retry(
             QueryPlan, QUERY_PLAN_TEMPLATE, query_str=query
         )
 
@@ -192,7 +195,7 @@ class RagWorkflow(Workflow):
         original_query = await ctx.store.get("query")
         context_preview = "\n\n".join(n.node.get_content()[:800] for n in ev.nodes)
 
-        evaluation = await get_llm().astructured_predict(
+        evaluation = await astructured_predict_with_retry(
             RetrievalEvaluation,
             EVALUATE_TEMPLATE,
             query_str=original_query,
@@ -231,7 +234,7 @@ class RagWorkflow(Workflow):
         else:
             raise NotImplementedError("Image synthesis is not implemented yet.")
 
-        response = await get_llm().achat([message])
+        response = await achat_with_retry([message])
         return StopEvent(result=response)
 
     @staticmethod

@@ -69,7 +69,7 @@ def _score_api(
             "Authorization": f"Bearer {settings.api_key}",
         },
         json={
-            "model": settings.model_name,
+            "model": settings.model_name.split("/")[-1],
             "query": query,
             "documents": documents,
             "return_documents": False,

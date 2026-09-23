@@ -40,10 +40,11 @@ class ColPaliSettings(BaseModel):
 
 
 class RerankerSettings(BaseModel):
-    mode: RerankerMode = RerankerMode.LOCAL
+    mode: RerankerMode = RerankerMode.API
     model_name: str = "jinaai/jina-reranker-m0"
     device: str = "cuda"
     top_n: int = 5
+    api_key: str | None = None
 
 
 class Settings(BaseSettings):

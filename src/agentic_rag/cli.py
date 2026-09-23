@@ -103,7 +103,7 @@ def query(
     _require_text_kb(kb)
 
     with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
-        answer = asyncio.run(run_text_rag(question, kb))
+        answer = asyncio.run(run_text_rag(kb, question))
     console.print(f"[green]Answer:[/green] {answer}")
 
 
@@ -122,7 +122,7 @@ def chat(
         if question.strip().lower() in {"exit", "quit"}:
             break
         with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
-            answer = asyncio.run(run_text_rag(question, kb))
+            answer = asyncio.run(run_text_rag(kb, question))
         console.print(f"[green]Answer:[/green] {answer}")
 
 

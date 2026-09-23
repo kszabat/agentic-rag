@@ -53,6 +53,7 @@ dependencies = [
     { name = "pypdfium2" },
     { name = "qdrant-client" },
     { name = "sentence-transformers", extra = ["image"] },
+    { name = "tenacity" },
     { name = "transformers" },
     { name = "typer" },
 ]
@@ -79,6 +80,7 @@ requires-dist = [
     { name = "pypdfium2", specifier = ">=5.13.0" },
     { name = "qdrant-client", specifier = ">=1.19.0" },
     { name = "sentence-transformers", extras = ["image"], specifier = ">=6.0.0" },
+    { name = "tenacity", specifier = ">=9.1.4" },
     { name = "transformers", specifier = ">=5.16.1" },
     { name = "typer", specifier = ">=0.26.8" },
 ]

@@ -2,12 +2,37 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import (
+    PdfPipelineOptions,
+    TableStructureOptions,
+    TableFormerMode,
+)
+from docling.document_converter import DocumentConverter, PdfFormatOption
 from llama_index.core import StorageContext, VectorStoreIndex
 from llama_index.node_parser.docling import DoclingNodeParser
 from llama_index.readers.docling import DoclingReader
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 
-_reader = DoclingReader(export_type=DoclingReader.ExportType.JSON)
+_pipeline_options = PdfPipelineOptions()
+_table_structure_options = TableStructureOptions()
+_table_structure_options.mode = TableFormerMode.ACCURATE
+_pipeline_options.generate_page_images = False
+_pipeline_options.generate_picture_images = False
+# _pipeline_options.images_scale =
+_pipeline_options.do_table_structure = True
+_pipeline_options.do_ocr = False
+_pipeline_options.table_structure_options = _table_structure_options
+
+_document_converter = DocumentConverter(
+    format_options={
+        InputFormat.PDF: PdfFormatOption(pipeline_options=_pipeline_options)
+    }
+)
+
+_reader = DoclingReader(
+    doc_converter=_document_converter, export_type=DoclingReader.ExportType.JSON
+)
 _node_parser = DoclingNodeParser()
 
 from agentic_rag.embeddings.bge_m3 import (

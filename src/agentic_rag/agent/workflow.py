@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import logging
 from typing import Literal
 
 from llama_index.core.llms import ChatMessage, ImageBlock, TextBlock
 from llama_index.core.prompts import RichPromptTemplate
-from llama_index.core.schema import NodeWithScore, QueryBundle
+from llama_index.core.schema import ImageNode, NodeWithScore, QueryBundle
 from llama_index.core.workflow import (
     Context,
     Event,
@@ -22,6 +23,8 @@ from agentic_rag.llm.factory import (
 from agentic_rag.retrieval.reranker import get_reranker
 from agentic_rag.retrieval.text_retriever import get_text_retriever
 from agentic_rag.vector_store.qdrant_manager import RagType
+
+logger = logging.getLogger(__name__)
 
 MAX_ATTEMPTS = 2
 
@@ -58,6 +61,20 @@ User Question: {{query_str}}
 Context: 
 {{context_str}}
 """
+
+
+def _node_preview(node_with_score: NodeWithScore, max_chars: int = 200) -> str:
+    node = node_with_score.node
+    score = node_with_score.score if node_with_score.score is not None else float("nan")
+
+    if isinstance(node, ImageNode):
+        meta = node.metadata
+        return f"score={score:.4f}, image_path={node.image_path}, page_number={meta.get('page_number')}, doc_id={meta.get('doc_id')}"
+
+    text = node.get_content().replace("\n", " ").strip()
+    if len(text) > max_chars:
+        text = text[:max_chars] + "..."
+    return f"score={score:.4f}, text={text}"
 
 
 class QueryPlan(BaseModel):
@@ -140,6 +157,9 @@ class RagWorkflow(Workflow):
         )
 
         search_text = plan.rewritten_query if plan.needs_rewrite else query
+        logger.info(
+            "Query plan: needs_rewrite={plan.needs_rewrite}, search_text={search_text}"
+        )
         similarity_top_k = ev.get("similarity_top_k", DEFAULT_TOP_K[mode])
 
         return SearchEvent(
@@ -161,6 +181,9 @@ class RagWorkflow(Workflow):
             raise NotImplementedError("Image retrieval is not implemented yet.")
 
         nodes = retriever.retrieve(ev.search_text)
+        logger.info(
+            f"retrieve: attempt={ev.attempt}, search_text={ev.search_text}, retrieved_nodes_count={len(nodes)}"
+        )
         return RetrieverEvent(
             nodes=nodes,
             search_text=ev.search_text,
@@ -174,6 +197,9 @@ class RagWorkflow(Workflow):
         nodes = reranker.postprocess_nodes(
             ev.nodes, query_bundle=QueryBundle(query_str=ev.search_text)
         )
+        logger.info(f"rerank: attempt={ev.attempt}, reranked_nodes_count={len(nodes)}")
+        for n in nodes:
+            logger.info(f"  {_node_preview(n)}")
         return RerankEvent(
             nodes=nodes,
             search_text=ev.search_text,
@@ -190,6 +216,9 @@ class RagWorkflow(Workflow):
         if mode == RagType.IMAGE:
             raise NotImplementedError("Image evaluation is not implemented yet.")
         if ev.attempt >= MAX_ATTEMPTS:
+            logger.info(
+                f"evaluate: attempt={ev.attempt}, max attempts reached, proceeding to synthesis"
+            )
             return SynthesizeEvent(nodes=ev.nodes)
 
         original_query = await ctx.store.get("query")
@@ -200,6 +229,9 @@ class RagWorkflow(Workflow):
             EVALUATE_TEMPLATE,
             query_str=original_query,
             context_str=context_preview,
+        )
+        logger.info(
+            f"evaluate: attempt={ev.attempt}, sufficient={evaluation.sufficient}, strategy={evaluation.strategy}, new_query_or_passage={evaluation.new_query_or_passage}"
         )
 
         if evaluation.sufficient:
@@ -217,6 +249,10 @@ class RagWorkflow(Workflow):
         else:
             next_search_text = ev.search_text
             next_top_k = ev.similarity_top_k
+
+        logger.info(
+            f"evaluate: attempt={ev.attempt}, next_search_text={next_search_text}, next_top_k={next_top_k}"
+        )
 
         return SearchEvent(
             search_text=next_search_text,
@@ -261,10 +297,10 @@ class RagWorkflow(Workflow):
 async def run_text_rag(kb_name: str, query: str) -> str:
     workflow = RagWorkflow(timeout=180)
     result = await workflow.run(query=query, kb_name=kb_name, mode=RagType.TEXT)
-    return str(result)
+    return result.message.content or ""
 
 
 async def run_image_rag(kb_name: str, query: str) -> str:
     workflow = RagWorkflow(timeout=180)
     result = await workflow.run(query=query, kb_name=kb_name, mode=RagType.IMAGE)
-    return str(result)
+    return result.message.content or ""

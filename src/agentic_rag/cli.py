@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from pathlib import Path
 
 import typer
 from google.genai.errors import ServerError
 from rich.console import Console
+from rich.logging import RichHandler
+from rich.markdown import Markdown
 
 from agentic_rag.agent.workflow import run_text_rag
 from agentic_rag.ingestion.image_pipeline import ingest_image_document
@@ -27,6 +30,16 @@ kb_app = typer.Typer(help="Knowledge base management commands", no_args_is_help=
 app.add_typer(kb_app, name="kb")
 
 console = Console()
+
+
+def _configure_logging(verbose: bool) -> None:
+    logging.basicConfig(
+        level=logging.INFO if verbose else logging.WARNING,
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler(console=console, show_path=False, markup=True)],
+        force=True,
+    )
 
 
 def _iter_input_files(path: Path, mode: RagType) -> list[Path]:
@@ -100,22 +113,36 @@ def query(
         ..., help="Query string to search the knowledge base"
     ),
     kb: str = typer.Option(..., "--kb", help="Name of the knowledge base to query"),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
 ) -> None:
+    _configure_logging(verbose)
     _require_text_kb(kb)
 
-    with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
-        try:
+    try:
+        if verbose:
             answer = asyncio.run(run_text_rag(kb, question))
-        except ServerError:
-            console.print("[red]LLM Server is currently unavailable. Try again later.[/red]")
-            raise typer.Exit(code=1)
-    console.print(f"[green]Answer:[/green] {answer}")
+        else:
+            with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
+                answer = asyncio.run(run_text_rag(kb, question))
+
+    except ServerError:
+        console.print(
+            "[red]LLM Server is currently unavailable. Try again later.[/red]"
+        )
+        raise typer.Exit(code=1)
+    console.print(Markdown(f"[green]Answer:[/green] {answer}"))
 
 
 @app.command()
 def chat(
     kb: str = typer.Option(..., "--kb", help="Name of the knowledge base to chat with"),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
 ) -> None:
+    _configure_logging(verbose)
     _require_text_kb(kb)
 
     console.print(f"[cyan]Starting chat session with knowledge base '{kb}'...[/cyan]")
@@ -126,13 +153,18 @@ def chat(
             break
         if question.strip().lower() in {"exit", "quit"}:
             break
-        with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
-            try:
+        try:
+            if verbose:
                 answer = asyncio.run(run_text_rag(kb, question))
-            except ServerError:
-                console.print("[red]LLM Server is currently unavailable. Try again later.[/red]")
-                continue
-        console.print(f"[green]Answer:[/green] {answer}")
+            else:
+                with console.status(f"[cyan]Querying knowledge base '{kb}'...[/cyan]"):
+                    answer = asyncio.run(run_text_rag(kb, question))
+        except ServerError:
+            console.print(
+                "[red]LLM Server is currently unavailable. Try again later.[/red]"
+            )
+            continue
+        console.print(Markdown(f"[green]Answer:[/green] {answer}"))
 
 
 @kb_app.command("list")

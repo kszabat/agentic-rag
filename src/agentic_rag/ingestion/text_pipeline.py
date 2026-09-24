@@ -5,8 +5,8 @@ from pathlib import Path
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
-    TableStructureOptions,
     TableFormerMode,
+    TableStructureOptions,
 )
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from llama_index.core import StorageContext, VectorStoreIndex
